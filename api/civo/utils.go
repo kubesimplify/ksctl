@@ -20,6 +20,7 @@ import (
 	"github.com/civo/civogo"
 	util "github.com/kubesimplify/ksctl/api/utils"
 	"golang.org/x/crypto/ssh"
+	"net"
 )
 
 // NOTE: where are the configs stored
@@ -209,14 +210,14 @@ func (config *JsonStore) ConfigWriterInstanceWorkerNodes(instanceID string) erro
 
 func ExecWithoutOutput(publicIP, password, script string, fastMode bool) error {
 
+	var hostkey ssh.PublicKey
+	signer, _ := ssh.ParsePrivateKey([]byte(password))
 	config := &ssh.ClientConfig{
 		User: "root",
 		Auth: []ssh.AuthMethod{
-			ssh.Password(password),
+			ssh.PublicKeys(signer),
 		},
-		//HostKeyCallback: hostKeyCallback,
-		// FIXME: Insecure Ignore should be replaced with secure
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		HostKeyCallback: ssh.FixedHostKey(hostkey),
 	}
 
 	if !fastMode {
@@ -261,14 +262,14 @@ func ExecWithoutOutput(publicIP, password, script string, fastMode bool) error {
 
 func ExecWithOutput(publicIP, password, script string, fastMode bool) (string, error) {
 
+	var hostkey ssh.PublicKey
+	signer, _ := ssh.ParsePrivateKey([]byte(password))
 	config := &ssh.ClientConfig{
 		User: "root",
 		Auth: []ssh.AuthMethod{
-			ssh.Password(password),
+			ssh.PublicKeys(signer),
 		},
-		//HostKeyCallback: hostKeyCallback,
-		// FIXME: Insecure Ignore should be replaced with secure
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		HostKeyCallback: ssh.FixedHostKey(hostkey),
 	}
 
 	if !fastMode {
